@@ -1,3 +1,4 @@
+### Task a: Provide detailed description of each datasets, their properties and relationships
 # Install and load package
 install.packages("readxl")
 library(readxl)
@@ -35,13 +36,13 @@ colnames(sample_plan_data)
 
 
 ### Task b: Read data from CSV files into the R environment for processing 
+
 install.packages("dplyr")
 library(dplyr)
+
 #Read all planning data files and production data files into separate data frames using a loop
 plan_data_list <- lapply(plan_files, read_excel)
 plan_data_list
-# Combine all data frames in plan_data_list into one
-combined_plan_data <- bind_rows(plan_data_list)
 
 production_data_list <- lapply(production_files, read_excel)
 production_data_list
@@ -57,21 +58,31 @@ problematic_data_frames <- lapply(plan_data_list, function(data) {
     return(NULL)
   }
 })
-#Convert character "Date" columns to character format
-for (i in 1:length(plan_data_list)) {
-  if (!is.null(plan_data_list[[i]]$Date)) {
-    # Convert the "Date" column to character
-    plan_data_list[[i]]$Date <- as.character(plan_data_list[[i]]$Date)
-    # Rename the column to "Date" if it's not already named that
-    colnames(plan_data_list[[i]])[colnames(plan_data_list[[i]]) == "Date"] <- "Date"
+
+
+# Function to remove rows before the headers
+remove_rows_before_headers <- function(df) {
+  # Define a condition to match the expected header values
+  header_condition <- df$...1 == "Module" &
+    df$...2 == "Material"
+  
+  # Identify the row where the headers are located based on the condition
+  header_row <- which(header_condition)
+  
+  # Remove rows before the header row
+  if (!is.null(header_row) && length(header_row) > 0) {
+    df <- df[(header_row[1] + 1):nrow(df), ]
   }
+  
+  return(df)
 }
 
-#Check the data types of the "Date" column in each data frame within plan_data_list
-# Check data types of the "Date" column in each data frame
-for (i in 1:length(plan_data_list)) {
-  print(class(plan_data_list[[i]]$Date))
-}
+# Apply the function to each data frame in plan_data_list
+plan_data_list <- lapply(plan_data_list, remove_rows_before_headers)
+
+plan_data_list
+
+
 
 
 
