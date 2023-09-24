@@ -363,4 +363,101 @@ prod_normalized_data_list
 
 ###########################################
 
-### Task e: Merge the datasets #####
+###### Task e: Merge the datasets #######
+
+# Combine all data frames in the list into a single data frame
+plan_combinedd <- bind_rows(plan_normalized_data_list)
+
+# Check the structure of the combined data frame
+str(plan_combined)
+
+# Repeat the same process for the production data
+prod_combined <- bind_rows(prod_normalized_data_list)
+
+# Check the structure of the combined production data frame
+str(prod_combined)
+
+
+
+install.packages("lubridate")
+library(lubridate)  # For date/time manipulation
+
+# Function to convert "Date" column to datetime format, handling missing cases
+convert_date_column <- function(df) {
+  if ("Date" %in% colnames(df)) {
+    df$Date <- as_datetime(df$Date)
+  }
+  return(df)
+}
+
+# Function to ensure "Material" column exists, and convert if needed
+convert_material_column <- function(df) {
+  if ("Material" %in% colnames(df)) {
+    df$Material <- as.character(df$Material)
+  }
+  return(df)
+}
+
+# Function to ensure "S/O" column exists, and convert if needed
+convert_SO_column <- function(df) {
+  if ("S/O" %in% colnames(df)) {
+    df$S/O <- as.character(df$S/O)
+  }
+  return(df)
+}
+
+# Apply the function to each data frame in the list
+plan_normalized_data_list <- lapply(plan_normalized_data_list, convert_date_column)
+prod_normalized_data_list <- lapply(prod_normalized_data_list, convert_date_column)
+
+# Apply the material column conversion function to each data frame in the list
+plan_normalized_data_list <- lapply(plan_normalized_data_list, convert_material_column)
+prod_normalized_data_list <- lapply(prod_normalized_data_list, convert_material_column)
+
+# Function to ensure a column exists and convert if needed
+convert_column <- function(df, column_name, target_data_type) {
+  if (column_name %in% colnames(df)) {
+    current_data_type <- typeof(df[[column_name]])
+    if (current_data_type != target_data_type) {
+      df[[column_name]] <- as(target_data_type, df[[column_name]])
+    }
+  }
+  return(df)
+}
+# Apply the column conversion function to each data frame in the list
+column_name <- "S/O"  # Replace with the actual column name
+target_data_type <- "character"  # Replace with the desired data type
+
+plan_normalized_data_list <- lapply(plan_normalized_data_list, function(df) {
+  convert_column(df, column_name, target_data_type)
+})
+
+prod_normalized_data_list <- lapply(prod_normalized_data_list, function(df) {
+  convert_column(df, column_name, target_data_type)
+})
+
+# Combine all data frames in the list into a single data frame
+plan_combined <- bind_rows(plan_normalized_data_list)
+prod_combined <- bind_rows(prod_normalized_data_list)
+
+
+
+
+
+
+
+
+
+
+
+
+# Combine all data frames in the list into a single data frame
+plan_combined <- bind_rows(plan_normalized_data_list)
+prod_combined <- bind_rows(prod_normalized_data_list)
+
+# Check the structure of the combined data frame
+str(plan_combined)
+str(prod_combined)
+
+
+
