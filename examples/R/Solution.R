@@ -33,7 +33,7 @@ colnames(sample_plan_data)
 
 
 
-##### Task b: Read data from CSV files into the R environment for processing #####
+######## Task b: Read data from CSV files into the R environment for processing #####
 
 install.packages("dplyr")
 library(dplyr)
@@ -102,6 +102,7 @@ plan_data_list_cleaned <- lapply(plan_data_list, function(df) {
   return(df)
 })
 
+
 # Display the cleaned data frames
 for (i in 1:length(plan_data_list_cleaned)) {
   cat("Data Frame", i, "after removing rows with empty values:\n")
@@ -164,30 +165,6 @@ for (i in 1:length(outliers_SMV_planning_list)) {
   cat("\n")
 }
 
-# Remove outliers from each data frame in plan_data_list
-# column_name <- "SMV"
-# cleaned_plan_data_list <- lapply(plan_data_list_cleaned, function(df) {
-#   # Check if the specified column exists in the data frame
-#   if (!column_name %in% colnames(df)) {
-#     return(df)  # Skip processing if the column doesn't exist
-#   }
-#   
-#   # Check if the specified column contains valid numeric data
-#   if (!all(is.numeric(df[[column_name]]))) {
-#     return(df)  # Skip processing if the column is not numeric
-#   }
-#   
-#   # Identify outliers, excluding the header row
-#   outliers <- identify_outliers(df, column = column_name)
-#   if (nrow(outliers) > 0) {
-#     # Remove the rows for outliers while keeping the header row
-#     df <- df[-as.numeric(rownames(outliers)) + 1, ]
-#   }
-#   return(df)
-# })
-
-# Display the modified data frames without outliers
-# cleaned_plan_data_list
 
 #Efficency planning outliers
 outliers_EFF_planning_list <- lapply(plan_data_list_cleaned, function(df) {
@@ -210,7 +187,7 @@ plan_data_list_cleaned
 
 ## Apply the function to each data frame in prod_data_list ##
 
-#SMV planning outliers
+#SMV production outliers
 outliers_SMV_prod_list <- lapply(prod_data_list_cleaned, function(df) {
   outliers <- tryCatch(
     identify_outliers(df, "SMV"),  
@@ -241,81 +218,6 @@ for (i in 1:length(outliers_Eff_prod_list)) {
   print(outliers_SMV_prod_list[[i]])
   cat("\n")
 }
-
-
-
-
-
-
-
-# # Apply the function to each data frame in production_data_list
-# 
-# #SMV production outliers
-# outliers_production_list <- lapply(production_data_list, function(df) {
-#   outliers <- tryCatch(
-#     identify_outliers(df, "SMV"),  
-#     error = function(e) NULL  # Handle the case when no outliers are found
-#   )
-#   return(outliers)
-# })
-# outliers_production_list
-# 
-# # Apply the function to each data frame in plan_data_list
-# outliers_production_list <- lapply(production_data_list, function(df) {
-#   identify_outliers(df, "SMV")  # Replace "SMV" with the column you want to analyze for outliers
-# })
-# 
-# 
-# # Filter out NULL elements from the production list
-# outliers_production_list <- outliers_list[sapply(outliers_production_list, function(x) !is.null(x))]
-# outliers_production_list
-
-
-# #Identify the data frame(s) with a character "Material" column
-# problematic_data_frames <- lapply(plan_data_list, function(data) {
-#   if (is.character(data$Material)) {
-#     return(data)
-#   } else {
-#     return(NULL)
-#   }
-# })
-# #Convert character "Material" columns to double
-# for (i in seq_along(problematic_data_frames)) {
-#   if (!is.null(problematic_data_frames[[i]])) {
-#     problematic_data_frames[[i]]$Material <- as.numeric(problematic_data_frames[[i]]$Material)
-#   }
-# }
-# 
-# # Function to convert date columns to character
-# convert_date_column <- function(df) {
-#   # Find the columns that are of POSIXct or POSIXt data type
-#   #date_columns <- names(df)[sapply(df, is.POSIXct) | sapply(df, is.POSIXt)]
-#   
-#   # Check if the column name is null and rename it to "Date"
-#   date_columns <- ifelse(is.null(date_columns), "Date", date_columns)
-#   
-#   # Convert each date column to character
-#   for (col in date_columns) {
-#     df[[col]] <- as.character(df[[col]])
-#   }
-#   
-#   # Rename the columns to "Date"
-#   names(df) <- ifelse(names(df) %in% date_columns, "Date", names(df))
-#   
-#   return(df)
-# }
-# 
-# # Apply the function to each data frame in plan_data_list
-# plan_data_list <- lapply(plan_data_list, convert_date_column)
-# plan_data_list
-# 
-# #bind_rows to combine the data frames
-# combined_plan_data <- bind_rows(plan_dataa_list)
-# combined_plan_data
-# for (i in 1:length(plan_data_list)) {
-#   cat("Data Frame", i, ":\n")
-#   print(head(plan_data_list[[i]], 100))
-# }
 
 
 ###########################################
@@ -365,27 +267,13 @@ prod_normalized_data_list
 
 ###### Task e: Merge the datasets #######
 
-# Combine all data frames in the list into a single data frame
-plan_combinedd <- bind_rows(plan_normalized_data_list)
-
-# Check the structure of the combined data frame
-str(plan_combined)
-
-# Repeat the same process for the production data
-prod_combined <- bind_rows(prod_normalized_data_list)
-
-# Check the structure of the combined production data frame
-str(prod_combined)
-
-
-
 install.packages("lubridate")
 library(lubridate)  # For date/time manipulation
 
 # Function to convert "Date" column to datetime format, handling missing cases
 convert_date_column <- function(df) {
   if ("Date" %in% colnames(df)) {
-    df$Date <- as_datetime(df$Date)
+    df$Date <- as.character(df$Date)
   }
   return(df)
 }
@@ -401,7 +289,8 @@ convert_material_column <- function(df) {
 # Function to ensure "S/O" column exists, and convert if needed
 convert_SO_column <- function(df) {
   if ("S/O" %in% colnames(df)) {
-    df$S/O <- as.character(df$S/O)
+    # Use backticks to reference the column with a special character
+    df$`S/O` <- as.character(df$`S/O`)
   }
   return(df)
 }
@@ -414,42 +303,9 @@ prod_normalized_data_list <- lapply(prod_normalized_data_list, convert_date_colu
 plan_normalized_data_list <- lapply(plan_normalized_data_list, convert_material_column)
 prod_normalized_data_list <- lapply(prod_normalized_data_list, convert_material_column)
 
-# Function to ensure a column exists and convert if needed
-convert_column <- function(df, column_name, target_data_type) {
-  if (column_name %in% colnames(df)) {
-    current_data_type <- typeof(df[[column_name]])
-    if (current_data_type != target_data_type) {
-      df[[column_name]] <- as(target_data_type, df[[column_name]])
-    }
-  }
-  return(df)
-}
-# Apply the column conversion function to each data frame in the list
-column_name <- "S/O"  # Replace with the actual column name
-target_data_type <- "character"  # Replace with the desired data type
-
-plan_normalized_data_list <- lapply(plan_normalized_data_list, function(df) {
-  convert_column(df, column_name, target_data_type)
-})
-
-prod_normalized_data_list <- lapply(prod_normalized_data_list, function(df) {
-  convert_column(df, column_name, target_data_type)
-})
-
-# Combine all data frames in the list into a single data frame
-plan_combined <- bind_rows(plan_normalized_data_list)
-prod_combined <- bind_rows(prod_normalized_data_list)
-
-
-
-
-
-
-
-
-
-
-
+# Apply the SO column conversion function to each data frame in the list
+plan_normalized_data_list <- lapply(plan_normalized_data_list, convert_SO_column)
+prod_normalized_data_list <- lapply(prod_normalized_data_list, convert_SO_column)
 
 # Combine all data frames in the list into a single data frame
 plan_combined <- bind_rows(plan_normalized_data_list)
@@ -457,7 +313,217 @@ prod_combined <- bind_rows(prod_normalized_data_list)
 
 # Check the structure of the combined data frame
 str(plan_combined)
+plan_combined
 str(prod_combined)
+prod_combined
+
+
+# Set the first row as column names and remove it for plan_combined
+new_colnames <- plan_combined[1, ]
+plan_combined <- plan_combined[-1, ]
+# Replace column names with non-empty, non-NULL, and non-NA values
+colnames(plan_combined) <- ifelse(!is.na(new_colnames) & new_colnames != "" & !is.null(new_colnames), new_colnames, colnames(plan_combined))
+# Set the first row as column names and remove it for prod_combined
+new_colnames <- prod_combined[1, ]
+prod_combined <- prod_combined[-1, ]
+# Replace column names with non-empty, non-NULL, and non-NA values
+colnames(prod_combined) <- ifelse(!is.na(new_colnames) & new_colnames != "" & !is.null(new_colnames), new_colnames, colnames(prod_combined))
+
+# Display the modified data frames
+print(plan_combined)
+print(prod_combined)
+
+# Merge the data frames based on the unique key
+# Find the column names "SO" and "LI" in prod_combined and rename them
+if ("SO" %in% colnames(prod_combined)) {
+  colnames(prod_combined)[colnames(prod_combined) == "SO"] <- "S/O"
+}
+
+if ("LI" %in% colnames(prod_combined)) {
+  colnames(prod_combined)[colnames(prod_combined) == "LI"] <- "L/I"
+}
+
+if ("Eff. %" %in% colnames(plan_combined)) {
+  colnames(plan_combined)[colnames(plan_combined) == "Eff. %"] <- "Efficiency"
+}
+
+if ("Standard Hours." %in% colnames(plan_combined)) {
+  colnames(plan_combined)[colnames(plan_combined) == "Standard Hours."] <- "Standard Hours"
+}
+
+if ("Work Hours." %in% colnames(plan_combined)) {
+  colnames(plan_combined)[colnames(plan_combined) == "Work Hours."] <- "Worked Hours"
+}
+
+# Select the desired columns from plan_combined
+plancombined <- select(plan_combined, "S/O", "L/I", "Efficiency", "Standard Hours", "Worked Hours", "SMV")
+plancombined
+
+# Select the desired columns from prod_combined
+prodcombined <- select(prod_combined, "S/O", "L/I", "Efficiency", "Standard Hours", "Worked Hours", "SMV")
+prodcombined
+
+# Now, perform the outer join
+merged_data <- inner_join(plancombined, prodcombined, by = c("S/O" = "S/O", "L/I" = "L/I"))
+merged_data
+#########################################################################
+
+
+############ Task f: Create training and test datasets #################
+
+# For data splitting and modeling
+install.packages("caret") 
+library(caret)
+
+set.seed(123)  # Set a seed for reproducibility
+split_ratio <- 0.7  # 70% for training, 30% for testing
+
+# Calculate the number of rows for the training set
+num_training <- round(nrow(merged_data) * split_ratio)
+
+# Randomly sample rows for the training set
+training_indexes <- sample(seq_len(nrow(merged_data)), size = num_training)
+
+# Create the training and testing datasets
+training_data <- merged_data[training_indexes, ]
+training_data
+testing_data <- merged_data[-training_indexes, ]
+testing_data
+
+
+#Check the Result
+dim(training_data)
+dim(testing_data)
+
+#######################################################################
+
+###### Task g&h: Training a model on the data | Apply different Machine Learning approaches and discuss#######################
+
+# For data visualization
+# install.packages("ggplot2") 
+library(ggplot2)  
+
+
+##############Clustering##########################
+
+# Assuming you have the necessary libraries loaded (e.g., 'cluster' for k-means)
+library(cluster)
+
+# Select the columns for clustering
+cluster_data <- select(merged_data, "Efficiency.x", "Standard Hours.x", "Worked Hours.x", "SMV.y")
+
+# Remove rows with missing values in the selected columns
+cluster_data <- cluster_data[complete.cases(cluster_data), ]
+
+# Check data types again
+str(cluster_data)
+
+# Check for missing values
+summary(cluster_data)
+anyNA(cluster_data)
+
+# Convert character columns to numeric
+cluster_data$Efficiency.x <- as.numeric(cluster_data$Efficiency.x)
+cluster_data$`Standard Hours.x` <- as.numeric(cluster_data$`Standard Hours.x`)
+cluster_data$`Worked Hours.x` <- as.numeric(cluster_data$`Worked Hours.x`)
+cluster_data$SMV.y <- as.numeric(cluster_data$SMV.y)
+
+
+########Average efficiency total dataset ###########
+average_efficiency <- mean(cluster_data$Efficiency.x)
+average_efficiency
+#######################################################
+
+
+# Now, scale the numeric columns
+normalized_data <- scale(cluster_data)
+
+# Specify the number of clusters (k)
+k <- 3  # You can adjust the number of clusters as needed
+
+# Perform k-means clustering
+kmeans_result <- kmeans(normalized_data, centers = k)
+kmeans_result
+
+# Extract cluster assignments
+cluster_assignments <- kmeans_result$cluster
+cluster_assignments
+
+# Add cluster assignments to the original data
+merged_data$Cluster <- cluster_assignments
+merged_data$Cluster
+
+# View the cluster assignments
+table(cluster_assignments)
+
+
+# Assuming you have a numeric dataset (e.g., normalized_data)
+library(ggplot2)
+
+# Assuming 'cluster_assignments' contains cluster assignments
+merged_data$Cluster <- cluster_assignments
+
+############## Task i: Evaluation ###########
+silhouette_score <- silhouette(cluster_assignments, dist(normalized_data))
+mean(silhouette_score)
+############################################
+
+########## Task k: Task k: Patterns identified and their visualizations #############################
+# Create a scatterplot for Efficiency vs. Standard Hours within each cluster
+ggplot(merged_data, aes(x = Efficiency.x, y = `Standard Hours.x`, color = as.factor(Cluster))) +
+  geom_point() +
+  labs(title = "Relationship between Efficiency and Standard Hours by Cluster")
+
+#######################################################################################################
 
 
 
+
+##############Linear regression##########################
+
+# Assuming you have a training dataset (training_data) and a testing dataset (testing_data)
+
+# Convert training_data character columns to numeric
+training_data$Efficiency.x <- as.numeric(training_data$Efficiency.x)
+training_data$`Standard Hours.x` <- as.numeric(training_data$`Standard Hours.x`)
+training_data$`Worked Hours.x` <- as.numeric(training_data$`Worked Hours.x`)
+training_data$SMV.y <- as.numeric(training_data$SMV.y)
+
+# Convert testing_data character columns to numeric
+testing_data$Efficiency.x <- as.numeric(testing_data$Efficiency.x)
+testing_data$`Standard Hours.x` <- as.numeric(testing_data$`Standard Hours.x`)
+testing_data$`Worked Hours.x` <- as.numeric(testing_data$`Worked Hours.x`)
+testing_data$SMV.y <- as.numeric(testing_data$SMV.y)
+
+################ Task g: Train a model on the data ###################################
+
+# Train the chosen model using the training dataset.
+model <- lm(Efficiency.x ~ ., data = training_data)  # Replace with your model of choice
+
+######################################################################################
+
+
+
+#######################Task I: Accuracy of each different models ####################
+
+# Make predictions on the testing data
+predictions <- predict(model, newdata = testing_data)
+
+# Calculate the evaluation metric (e.g., Mean Absolute Error for regression)
+mae <- mean(abs(predictions - testing_data$Efficiency))
+
+# Print the Mean Absolute Error (or use other relevant metrics)
+print(paste("Mean Absolute Error:", mae))
+
+############################################################################
+
+
+#####################Task k: Patterns identified and their visualizations ##################################
+
+plot(testing_data$Efficiency, predictions, main = "Model Evaluation", 
+     xlab = "Actual Efficiency", ylab = "Predicted Efficiency")
+########################################################################################################
+
+
+
+##################################################################
